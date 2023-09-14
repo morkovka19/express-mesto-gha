@@ -29,6 +29,8 @@ module.exports.getUser = (req, res) =>{
     console.log(e.name);
     if (e.name === 'DocumentNotFoundError')
       res.status(404).send({message: 'Пользователь по указанному _id не найден'});
+    if (e.name ="ValidationError")
+      res.status(400).send({message: 'Пользователь по указанному _id не найден'});
     else res.status(500).send({message: 'Произола ошибка'});
   })
 };
@@ -39,7 +41,7 @@ module.exports.installProfile = (req, res) =>{
   .then(card => res.status(200).send({data:card}))
   .catch(e =>{
     console.log(e);
-    if (e.name == 'ValidationError')
+    if (e.name === 'ValidationError')
       res.status(400).send({message: 'Переданы некорректные данные'});
     else
       res.status(500).send({message: 'Произола ошибка'});
