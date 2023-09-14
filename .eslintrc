@@ -1,6 +1,7 @@
 {
   "extends": "airbnb-base",
   "rules": {
-    "allowAfterThis": true
+    "allowAfterThis": true,
+    "allow": "_id"
   }
 }

@@ -6,7 +6,7 @@ module.exports.createCard = (req, res) => {
   const {name, link} = req.body;
   const owner = req.user._id;
   Card.create( {name, link, owner} )
- .then(card => res.status(200).send({data: card, ower: owner}))
+ .then(card => res.status(201).send({data: card, ower: owner}))
  .catch(e =>{
   console.log(e);
   if (e.name === 'ValidationError')
@@ -22,7 +22,7 @@ module.exports.getCards = (req,  res) =>{
   .then(cards => res.status(200).send({data: cards}))
   .catch((e) =>{
     console.log(e);
-    if (e.name === 'ValidationError')
+    if (e.name === 'CastError')
       res.status(400).send({message: 'Переданы некорректные данные'});
     else
       res.status(500).send({message: "Произошла ошибка"});
@@ -30,7 +30,7 @@ module.exports.getCards = (req,  res) =>{
 };
 
 module.exports.deleteCard = (req, res) =>{
-  Card.deleteOne()
+  Card.findByIdAndDelete(req.params.cardId)
   .then(card => res.status(200).send({data: card}))
   .catch(e =>{
     console.log(e);
@@ -51,8 +51,6 @@ module.exports.likeCard =(req, res) =>{
       console.log(e);
       if (e.name === 'CastError')
         res.status(404).send({message: 'Карточка по указанному _id не найдена'});
-      if (e.name == 'ValidationError')
-        res.status(400).send({message: 'Переданы некорректные данные для постановки лайка'});
       else
         res.status(500).send({message: 'Произола ошибка'});
     })
@@ -69,8 +67,6 @@ module.exports.deleteLike = (req, res) =>{
       console.log(e);
       if (e.name === 'CastError')
         res.status(404).send({message: 'Карточка по указанному _id не найдена'});
-      if (e.name == 'ValidationError')
-        res.status(400).send({message: 'Переданы некорректные данные для удаления лайка'});
       else
         res.status(500).send({message: 'Произола ошибка'});
     })

@@ -5,15 +5,13 @@ module.exports.getUsers =(req, res) =>{
   .then(users => res.send({data: users}))
   .catch((e) =>  {
     console.log(e.name);
-    if (e.name === 'ValidationError')
-      res.status(400).send({message: 'Переданы некорректные данные'});
-    else res.status(500).send({message: 'Произола ошибка'});
+    res.status(500).send({message: 'Произола ошибка'});
   });
 }
 
 module.exports.createUser = (req, res) =>{
   User.create(req.body)
-  .then(user => res.send({data:  user}))
+  .then(user => res.status(201).send({data:  user}))
   .catch((e) => {
     console.log(e.name);
     if (e.name === 'ValidationError')
@@ -25,11 +23,11 @@ module.exports.createUser = (req, res) =>{
 module.exports.getUser = (req, res) =>{
   const userId = req.params.userId;
   console.log(userId)
-  User.findById(req.params.userId)
+  User.findById(req.params.userId).orFail()
   .then(user => res.send({data: user}))
-  .catch((e) => {
+ .catch((e) => {
     console.log(e.name);
-    if (e.name === 'CastError')
+    if (e.name === 'DocumentNotFoundError')
       res.status(404).send({message: 'Пользователь по указанному _id не найден'});
     else res.status(500).send({message: 'Произола ошибка'});
   })
@@ -41,8 +39,6 @@ module.exports.installProfile = (req, res) =>{
   .then(card => res.status(200).send({data:card}))
   .catch(e =>{
     console.log(e);
-    if (e.name === 'CastError')
-      res.status(404).send({message: 'Пользователь по указанному _id не найден'});
     if (e.name == 'ValidationError')
       res.status(400).send({message: 'Переданы некорректные данные'});
     else
@@ -56,8 +52,6 @@ module.exports.installAvatar = (req, res) =>{
     .then(card => res.status(200).send({data:card}))
     .catch(e =>{
       console.log(e);
-      if (e.name === 'CastError')
-        res.status(404).send({message: 'Пользователь по указанному _id не найден'});
       if (e.name === 'ValidationError')
         res.status(400).send({message: 'Переданы некорректные данные'});
       else
