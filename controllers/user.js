@@ -18,7 +18,6 @@ module.exports.createUser = (req, res) => {
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId).orFail().then((user) => res.send({ data: user })).catch((e) => {
-    console.log(e.name);
     if (e.name === 'DocumentNotFoundError') res.status(ERROR_STATUS.CastError).send({ message: 'Пользователь по указанному _id не найден' });
     if (e.name === 'CastError') res.status(ERROR_STATUS.CastError).send({ message: 'Пользователь по указанному _id не найден' });
     else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
