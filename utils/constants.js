@@ -1,6 +1,6 @@
 const ERROR_STATUS = {
-  ValidationError: 404,
-  CastError: 400,
+  ValidationError: 400,
+  CastError: 404,
   ServerErroe: 500,
 };
 
