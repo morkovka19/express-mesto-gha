@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const { ERROR_STATUS } = require('../utils/constants');
+const ERROR_STATUS = require('../utils/constants');
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;

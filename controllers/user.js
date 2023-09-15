@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const { ERROR_STATUS } = require('../utils/constants');
+const ERROR_STATUS = require('../utils/constants');
 
 module.exports.getUsers = (req, res) => {
   User.find({}).then((users) => res.send(
@@ -11,7 +11,7 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.createUser = (req, res) => {
   User.create(req.body).then((user) => res.status(201).send({ data: user })).catch((e) => {
-    if (e.name === 'ValidationError') res.status(ERROR_STATUS[e.name]).send({ message: 'Переданы некорректные данные' });
+    if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
     else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
   });
 };
@@ -32,7 +32,7 @@ module.exports.installProfile = (req, res) => {
   )
     .then((card) => res.status(200).send({ data: card }))
     .catch((e) => {
-      if (e.name === 'ValidationError') res.status(ERROR_STATUS[e.name]).send({ message: 'Переданы некорректные данные' });
+      if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
     });
 };
@@ -46,7 +46,7 @@ module.exports.installAvatar = (req, res) => {
   )
     .then((card) => res.status(200).send({ data: card }))
     .catch((e) => {
-      if (e.name === 'ValidationError') res.status(ERROR_STATUS[e.name]).send({ message: 'Переданы некорректные данные' });
+      if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
     });
 };
