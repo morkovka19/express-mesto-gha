@@ -24,7 +24,9 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId).orFail(() => new Error('NotFoundError'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((e) => {
-      if (e.name === 'CastError') res.status(ERROR_STATUS[e.name]).send({ message: 'Карточка с указанным _id не найдена' });
+      console.log(e.name);
+      if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Некорректынй id' });
+      if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка с указанным _id не найдена' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произошла ошибка' });
     });
 };
@@ -38,7 +40,8 @@ module.exports.likeCard = (req, res) => {
     .then((card) => res.status(200).send({ data: card }))
     .catch((e) => {
       console.log(e.name);
-      if (e.name === 'NotFoundError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка по указанному _id не найдена' });
+      if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Карточка по указанному _id не найдена' });
+      if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка по указанному _id не найдена' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произошла ошибка' });
     });
 };
@@ -51,7 +54,9 @@ module.exports.deleteLike = (req, res) => {
   ).orFail(() => new Error('NotFoundError'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((e) => {
-      if (e.name === 'NotFoundError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка по указанному _id не найдена' });
+      console.log(e.name);
+      if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Карточка по указанному _id не найдена' });
+      if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка по указанному _id не найдена' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
     });
 };
