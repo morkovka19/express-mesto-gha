@@ -21,7 +21,7 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
+  Card.findByIdAndDelete(req.params.cardId).orFail(() => new Error('NotFoundError'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((e) => {
       if (e.name === 'CastError') res.status(ERROR_STATUS[e.name]).send({ message: 'Карточка с указанным _id не найдена' });
@@ -33,12 +33,13 @@ module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
-    { new: true },
-  )
+    { new: true, runValidators: true },
+  ).orFail(() => new Error('NotFoundError'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((e) => {
-      if (e.name === 'CastError') res.status(ERROR_STATUS[e.name]).send({ message: 'Карточка по указанному _id не найдена' });
-      else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
+      console.log(e.name);
+      if (e.name === 'NotFoundError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка по указанному _id не найдена' });
+      else res.status(ERROR_STATUS.ServerError).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -46,11 +47,11 @@ module.exports.deleteLike = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
-    { new: true },
-  )
+    { new: true, runValidators: true },
+  ).orFail(() => new Error('NotFoundError'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((e) => {
-      if (e.name === 'CastError') res.status(ERROR_STATUS[e.name]).send({ message: 'Карточка по указанному _id не найдена' });
+      if (e.name === 'NotFoundError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка по указанному _id не найдена' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
     });
 };
