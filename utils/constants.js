@@ -4,4 +4,7 @@ const ERROR_STATUS = {
   ServerError: 500,
 };
 
+module.exports.SUCCESS_STATUS = 200;
+module.exports.SUCCESS_CREATE = 201;
+
 module.exports = ERROR_STATUS;

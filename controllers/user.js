@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const ERROR_STATUS = require('../utils/constants');
+const { ERROR_STATUS, SUCCESS_STATUS, SUCCESS_CREATE } = require('../utils/constants');
 
 module.exports.getUsers = (req, res) => {
   User.find({}).then((users) => res.send(
@@ -10,7 +10,8 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  User.create(req.body).then((user) => res.status(201).send({ data: user })).catch((e) => {
+  User.create(req.body).then((user) => res.status(SUCCESS_CREATE)
+    .send({ data: user })).catch((e) => {
     if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
     else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
   });
@@ -30,9 +31,10 @@ module.exports.installProfile = (req, res) => {
     { $set: { name: req.body.name, about: req.body.about } },
     { new: true, runValidators: true },
   ).orFail(() => new Error('NotFoundError'))
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.status(SUCCESS_STATUS).send({ data: card }))
     .catch((e) => {
-      if (e.name === 'ValidationError' || e.name === 'Error') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
+      if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Переданы некорректные данные' });
+      if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
     });
 };
@@ -44,9 +46,10 @@ module.exports.installAvatar = (req, res) => {
     { new: true, runValidators: true },
     { useFindAndModify: false },
   ).orFail(() => new Error('NotFoundError'))
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.status(SUCCESS_STATUS).send({ data: card }))
     .catch((e) => {
-      if (e.name === 'Error') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
+      if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
+      if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Переданы некорректные данные' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
     });
 };
