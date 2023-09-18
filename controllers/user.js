@@ -20,7 +20,7 @@ module.exports.createUser = (req, res) => {
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId).orFail(() => new Error('NotFoundError')).then((user) => res.send({ data: user })).catch((e) => {
     if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Пользователь по указанному _id не найден' });
-    if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Пользователь по указанному _id не найден' });
+    else if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Пользователь по указанному _id не найден' });
     else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
   });
 };
@@ -34,7 +34,7 @@ module.exports.installProfile = (req, res) => {
     .then((card) => res.status(SUCCESS_STATUS).send({ data: card }))
     .catch((e) => {
       if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Переданы некорректные данные' });
-      if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
+      else if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
     });
 };
@@ -49,7 +49,7 @@ module.exports.installAvatar = (req, res) => {
     .then((card) => res.status(SUCCESS_STATUS).send({ data: card }))
     .catch((e) => {
       if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
-      if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Переданы некорректные данные' });
+      else if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Переданы некорректные данные' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
     });
 };

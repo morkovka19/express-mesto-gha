@@ -26,7 +26,7 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => res.status(SUCCESS_STATUS).send({ data: card }))
     .catch((e) => {
       if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Некорректынй id' });
-      if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка с указанным _id не найдена' });
+      else if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка с указанным _id не найдена' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произошла ошибка' });
     });
 };
@@ -40,7 +40,7 @@ module.exports.likeCard = (req, res) => {
     .then((card) => res.status(SUCCESS_STATUS).send({ data: card }))
     .catch((e) => {
       if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Карточка по указанному _id не найдена' });
-      if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка по указанному _id не найдена' });
+      else if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка по указанному _id не найдена' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произошла ошибка' });
     });
 };
@@ -54,7 +54,7 @@ module.exports.deleteLike = (req, res) => {
     .then((card) => res.status(SUCCESS_STATUS).send({ data: card }))
     .catch((e) => {
       if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Карточка по указанному _id не найдена' });
-      if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка по указанному _id не найдена' });
+      else if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Карточка по указанному _id не найдена' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
     });
 };
