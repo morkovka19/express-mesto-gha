@@ -19,7 +19,7 @@ module.exports.createUser = (req, res) => {
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId).orFail(() => new Error('NotFoundError')).then((user) => res.send({ data: user })).catch((e) => {
     if (e.name === 'NotFoundError') res.status(ERROR_STATUS.CastError).send({ message: 'Пользователь по указанному _id не найден' });
-    if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Пользователь по указанному _id не найден' });
+    if (e.name === 'CastError') res.status(ERROR_STATUS.CastError).send({ message: 'Пользователь по указанному _id не найден' });
     else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
   });
 };
@@ -32,7 +32,7 @@ module.exports.installProfile = (req, res) => {
   ).orFail(() => new Error('NotFoundError'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((e) => {
-      if (e.name === 'NotFoundError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
+      if (e.name === 'ValidationError' || e.name === 'NotFoundError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
     });
 };
