@@ -28,8 +28,7 @@ module.exports.installProfile = (req, res) => {
   User.findByIdAndUpdate(
     { _id: req.user._id },
     { $set: { name: req.body.name, about: req.body.about } },
-    { new: true },
-    { useFindAndModify: false },
+    { new: true, runValidators: true },
   )
     .then((card) => res.status(200).send({ data: card }))
     .catch((e) => {

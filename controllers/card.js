@@ -4,7 +4,7 @@ const ERROR_STATUS = require('../utils/constants');
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
-  Card.create({ name, link, owner }).then((card) => res.status(201).send({ id: card._id }))
+  Card.create({ name, link, owner }).then((card) => res.status(201).send({ _id: card._id }))
     .catch((e) => {
       if (e.name === 'ValidationError') res.status(ERROR_STATUS[e.name]).send({ message: 'Переданы некорректные данные' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произошла ошибка' });
