@@ -1,4 +1,4 @@
-const ERROR_STATUS = {
+module.exports.ERROR_STATUS = {
   ValidationError: 400,
   CastError: 404,
   ServerError: 500,
@@ -6,5 +6,3 @@ const ERROR_STATUS = {
 
 module.exports.SUCCESS_STATUS = 200;
 module.exports.SUCCESS_CREATE = 201;
-
-module.exports = ERROR_STATUS;
