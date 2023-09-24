@@ -1,3 +1,10 @@
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable object-curly-newline */
+/* eslint-disable consistent-return */
+// eslint-disable-next-line import/no-extraneous-dependencies
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const isEmail = require('validator/lib/isEmail');
 const User = require('../models/user');
 const { ERROR_STATUS, SUCCESS_STATUS, SUCCESS_CREATE } = require('../utils/constants');
 
@@ -10,11 +17,18 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  User.create(req.body).then((user) => res.status(SUCCESS_CREATE)
-    .send({ data: user })).catch((e) => {
-    if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
-    else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
-  });
+  const { email, password, avatar, login } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      if (isEmail(req.body.email)) {
+        User.create({ login, password: hash, email, avatar })
+          .then((user) => res.status(SUCCESS_CREATE)
+            .send({ data: user })).catch((e) => {
+            if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
+            else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
+          });
+      } else res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные почта' });
+    });
 };
 
 module.exports.getUser = (req, res) => {
@@ -51,5 +65,20 @@ module.exports.installAvatar = (req, res) => {
       if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
       else if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Переданы некорректные данные' });
       else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password).select('+password')
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
+      res.send({ token });
+    })
+    .catch((e) => {
+      res
+        .status(ERROR_STATUS.TokenError)
+        .send({ message: e.message });
     });
 };
