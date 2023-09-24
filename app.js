@@ -1,5 +1,7 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const express = require('express');
 const mongoose = require('mongoose');
+const { celebrate, Joi, errors } = require('celebrate');
 const user = require('./controllers/user');
 const auth = require('./middlewares/auth');
 
@@ -12,10 +14,20 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   console.log('Conected to db');
 });
 
+app.use(errors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.post('/signin', user.login);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2),
+    avatar: Joi.string().url(),
+    password: Joi.string().required().min(8),
+    email: Joi.string().required().email(),
+  }),
+}), user.login);
 app.post('/signup', user.createUser);
 
 app.use(auth);
