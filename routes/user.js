@@ -1,13 +1,22 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const router = require('express').Router();
-const auth = require('../middlewares/auth');
+const { celebrate, Joi } = require('celebrate');
 const {
   getUsers, getUser, installProfile, installAvatar,
 } = require('../controllers/user');
 
-router.get('/', auth, getUsers);
-router.get('/:userId', auth, getUser);
-router.patch('/me', auth, installProfile);
-router.patch('/me/avatar', auth, installAvatar);
+router.get('/', getUsers);
+router.get('/:userId', getUser);
+router.patch('/me', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2),
+  }),
+}), installProfile);
+router.patch('/me/avatar', celebrate({
+  body: Joi.object().keys({
+    avatar: Joi.string(),
+  }),
+}), installAvatar);
 
 module.exports = router;

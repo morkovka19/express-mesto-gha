@@ -8,38 +8,49 @@ const isEmail = require('validator/lib/isEmail');
 const User = require('../models/user');
 const { ERROR_STATUS, SUCCESS_STATUS, SUCCESS_CREATE } = require('../utils/constants');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({}).then((users) => res.send(
     { data: users },
   )).catch(() => {
-    res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
+    const err = new Error('Ошибка');
+    err.statusCode(ERROR_STATUS.ServerError);
+    next(err);
   });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { email, password, avatar, login } = req.body;
   bcrypt.hash(password, 10)
     .then((hash) => {
       if (isEmail(req.body.email)) {
         User.create({ login, password: hash, email, avatar })
           .then((user) => res.status(SUCCESS_CREATE)
-            .send({ data: user })).catch((e) => {
-            if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
-            else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
+            .send({ data: user.$ignore('password') })).catch((e) => {
+            const err = new Error('Ошибка при регистрации');
+            if (e.name === 'ValidationError') err.status(ERROR_STATUS.ValidationError);
+            else if (e.code === 11000) err.status(ERROR_STATUS.DBError);
+            else err.statusCode(ERROR_STATUS.ServerError);
+            next(err);
           });
-      } else res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные почта' });
+      } else {
+        const err = new Error('Ошибка при регистрации');
+        err.statusCode(ERROR_STATUS.ValidationError);
+        next(err);
+      }
     });
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId).orFail(() => new Error('NotFoundError')).then((user) => res.send({ data: user })).catch((e) => {
-    if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Пользователь по указанному _id не найден' });
-    else if (e.name === 'CastError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Пользователь по указанному _id не найден' });
-    else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
+    const err = new Error('Ошибка');
+    if (e.name === 'Error') err.statusCode(ERROR_STATUS.CastError);
+    else if (e.name === 'CastError') err.statusCodestatus(ERROR_STATUS.ValidationError);
+    else err.statusCode(ERROR_STATUS.ServerError);
+    next(err);
   });
 };
 
-module.exports.installProfile = (req, res) => {
+module.exports.installProfile = (req, res, next) => {
   User.findByIdAndUpdate(
     { _id: req.user._id },
     { $set: { name: req.body.name, about: req.body.about } },
@@ -47,13 +58,15 @@ module.exports.installProfile = (req, res) => {
   ).orFail(() => new Error('NotFoundError'))
     .then((card) => res.status(SUCCESS_STATUS).send({ data: card }))
     .catch((e) => {
-      if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Переданы некорректные данные' });
-      else if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
-      else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
+      const err = new Error('Ошибка при редактировании');
+      if (e.name === 'Error') err.statusCode(ERROR_STATUS.CastError);
+      else if (e.name === 'ValidationError') err.statusCode(ERROR_STATUS.ValidationError);
+      else err.statusCode(ERROR_STATUS.ServerError);
+      next(err);
     });
 };
 
-module.exports.installAvatar = (req, res) => {
+module.exports.installAvatar = (req, res, next) => {
   User.findByIdAndUpdate(
     { _id: req.user._id },
     { $set: { avatar: req.body.avatar } },
@@ -62,13 +75,15 @@ module.exports.installAvatar = (req, res) => {
   ).orFail(() => new Error('NotFoundError'))
     .then((card) => res.status(SUCCESS_STATUS).send({ data: card }))
     .catch((e) => {
-      if (e.name === 'ValidationError') res.status(ERROR_STATUS.ValidationError).send({ message: 'Переданы некорректные данные' });
-      else if (e.name === 'Error') res.status(ERROR_STATUS.CastError).send({ message: 'Переданы некорректные данные' });
-      else res.status(ERROR_STATUS.ServerError).send({ message: 'Произола ошибка' });
+      const err = new Error('Ошибка при редактировании');
+      if (e.name === 'ValidationError') err.statusError = ERROR_STATUS.ValidationError;
+      else if (e.name === 'Error') err.statusError = ERROR_STATUS.CastError;
+      else err.statusError = ERROR_STATUS.ServerError;
+      next(err);
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password).select('+password')
@@ -76,9 +91,9 @@ module.exports.login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
       res.send({ token });
     })
-    .catch((e) => {
-      res
-        .status(ERROR_STATUS.TokenError)
-        .send({ message: e.message });
+    .catch(() => {
+      const err = new Error('ОШибка авторизации');
+      err.statusCode = ERROR_STATUS.ValidationError;
+      next(err);
     });
 };

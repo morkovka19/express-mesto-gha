@@ -3,6 +3,7 @@ module.exports.ERROR_STATUS = {
   CastError: 404,
   ServerError: 500,
   TokenError: 401,
+  DBError: 409,
 };
 
 module.exports.SUCCESS_STATUS = 200;
